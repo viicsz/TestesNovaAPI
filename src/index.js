@@ -10,7 +10,7 @@ const credenciais = require('./credenciais_mongodb');
 //Observação 1 no README
 
 
-mongoose.connect(credenciais);
+
 const DatabasePKM = mongoose.model('DatabasePKM', { 
     nome: String,
     totalpkm: Number,
@@ -18,11 +18,32 @@ const DatabasePKM = mongoose.model('DatabasePKM', {
     lista_pokemons: String,
 });
 
-
-app.get ("/", (req, res) => {
-    res.send("Olá, teste")
+//GET
+app.get ("/", async (req, res) => {
+    const ListDatabasePKM = await DatabasePKM.find()
+    return res.send(ListDatabasePKM)
 })
 
+//DELETE
+app.delete("/:id", async(req, res) => {
+    const databasePKM = await DatabasePKM.findByIdAndDelete(req.params.id)
+    return res.send(databasePKM)
+})
+
+//UPDATE, PUT
+app.put("/:id", async(req, res) => {
+    const databasePKM = await DatabasePKM.findByIdAndUpdate(req.params.id, {
+        nome: req.body.nome,
+        totalpkm: req.body.totalpkm,
+        imagem_treinador: req.body.imagem_treinador,
+        lista_pokemons: req.body.lista_pokemons,
+    }, {
+        new: true
+    })
+    return res.send(databasePKM)
+})
+
+//POST
 app.post("/", async (req, res) => {
     const databasePKM = new DatabasePKM({
         nome: req.body.nome,
@@ -37,5 +58,6 @@ app.post("/", async (req, res) => {
 })
 
 app.listen(port, () => {
+    mongoose.connect(credenciais);
     console.log('App runing')
 })
